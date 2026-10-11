@@ -1,0 +1,21 @@
+name: Verify direct APK download
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  release-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify Release and APK asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release view latest --json url,assets
+          mkdir -p /tmp/debate-release
+          gh release download latest --pattern 'Debate-Arena.apk' --dir /tmp/debate-release
+          test -s /tmp/debate-release/Debate-Arena.apk
+          stat -c "Downloadable APK: %s bytes" /tmp/debate-release/Debate-Arena.apk
